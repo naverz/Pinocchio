@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="thumbColor" format="reference|color" />
+    <attr name="thumbStrokeColor" format="reference|color" />
+    <attr name="thumbRadius" format="dimension" />
+    <attr name="thumbStrokeWidth" format="dimension" />
+
+    <declare-styleable name="Slider">
+        <attr name="thumbColor" />
+        <attr name="thumbStrokeColor" />
+        <attr name="thumbRadius" />
+        <attr name="thumbStrokeWidth" />
+        <attr name="sliderWidth" format="dimension" />
+        <attr name="sliderOrientation" format="enum">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
+        <attr name="sliderCornerRadius" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="SliderPanel">
+        <attr name="thumbColor" />
+        <attr name="thumbStrokeColor" />
+        <attr name="thumbRadius" />
+        <attr name="thumbStrokeWidth" />
+        <attr name="panelCornerRadius" format="dimension" />
+    </declare-styleable>
+
+
+</resources>

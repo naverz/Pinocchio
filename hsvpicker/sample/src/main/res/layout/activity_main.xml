@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="#d3d3d3"
+    android:orientation="vertical"
+    >
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/sample_panel"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="15dp"
+        app:cardCornerRadius="10dp"
+        app:cardElevation="0dp"
+        app:layout_constraintBottom_toTopOf="@id/hue_slider"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <io.github.naverz.pinocchio.hsvpicker.view.AlphaSlider
+        android:id="@+id/alpha_slider"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:padding="10dp"
+        app:layout_constraintBottom_toBottomOf="@id/sat_val_panel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/hue_slider"
+        app:sliderOrientation="vertical"
+        />
+
+    <io.github.naverz.pinocchio.hsvpicker.view.HueSlider
+        android:id="@+id/hue_slider"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        app:layout_constraintBottom_toTopOf="@id/sat_val_panel"
+        app:layout_constraintEnd_toStartOf="@id/alpha_slider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sample_panel"
+        />
+
+    <io.github.naverz.pinocchio.hsvpicker.view.SatValPanel
+        android:id="@+id/sat_val_panel"
+        android:layout_width="0dp"
+        android:layout_height="200dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingBottom="10dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/alpha_slider"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/hue_slider"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

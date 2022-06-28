@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">HSVPicker</string>
+    <string name="hsv_picker_view_with_kotlin">HSVPicker in the view system with kotlin</string>
+    <string name="hsv_picker_view_with_java">HSVPicker in the view system with java</string>
+    <string name="hsv_picker_composable">HSVPicker in compose</string>
+</resources>
