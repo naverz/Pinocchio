@@ -6,9 +6,13 @@
 
 package io.github.naverz.pinocchio.hsvpicker.compose.panel
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.graphics.*
+import android.view.View
 import androidx.annotation.FloatRange
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,19 +20,21 @@ import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ExperimentalGraphicsApi
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import io.github.naverz.pinocchio.hsvpicker.compose.slider.AlphaSlider
 import io.github.naverz.pinocchio.hsvpicker.compose.slider.HueSlider
-import io.github.naverz.pinocchio.hsvpicker.compose.toPx
 import io.github.naverz.pinocchio.slider.compose.*
-import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 import io.github.naverz.pinocchio.slider.compose.data.Stroke
+import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 
 @Composable
 fun SaturationValuePanel(
@@ -116,8 +122,6 @@ fun SaturationValuePanel(
 }
 
 
-
-@OptIn(ExperimentalGraphicsApi::class)
 @Composable
 private fun BaseSaturationValuePanel(
     @FloatRange(from = 0.0, to = 360.0)
@@ -128,54 +132,46 @@ private fun BaseSaturationValuePanel(
     panelStroke: Stroke? = null,
     panelElevation: Dp? = null
 ) {
-    val baseGradientBrush = remember(alpha) {
-        Brush.verticalGradient(
-            listOf(
-                Color(red = 1f, green = 1f, blue = 1f, alpha = alpha),
-                Color(red = 0f, green = 0f, blue = 0f, alpha = alpha)
-            )
+    Box(
+        Modifier
+            .run {
+                if (panelElevation != null)
+                    shadow(panelElevation, RoundedCornerShape(cornerRadius))
+                else
+                    this
+            }
+            .run {
+                if (panelStroke != null)
+                    when (panelStroke) {
+                        is Stroke.WidthBrush ->
+                            this.border(
+                                width = panelStroke.width,
+                                brush = panelStroke.brush,
+                                shape = RoundedCornerShape(cornerRadius)
+                            )
+                        is Stroke.WidthColor ->
+                            this.border(
+                                width = panelStroke.width,
+                                color = panelStroke.color,
+                                shape = RoundedCornerShape(cornerRadius)
+                            )
+                    }
+                else
+                    this
+            }
+            .clip(RoundedCornerShape(cornerRadius))) {
+        AndroidView(
+            factory = {
+                CompatSaturationValuePanel(it)
+            },
+            update = { panel ->
+                panel.hue = hue
+                panel.panelAlpha = alpha
+            }
         )
-    }
-    val currentHueGradient = remember(hue, alpha) {
-        Brush.horizontalGradient(
-            listOf(
-                Color(red = 1f, green = 1f, blue = 1f, alpha = alpha),
-                Color.hsv(hue = hue, saturation = 1f, value = 1f, alpha = alpha)
-            )
-        )
-    }
-    val cornerRadiusModel = CornerRadius(cornerRadius.toPx())
-    Canvas(Modifier.fillMaxSize()
-        .run {
-            if (panelElevation != null) shadow(panelElevation, RoundedCornerShape(cornerRadius))
-            else this
-        }) {
-        drawRoundRect(
-            brush = baseGradientBrush,
-            cornerRadius = cornerRadiusModel
-        )
-        drawRoundRect(
-            brush = currentHueGradient,
-            cornerRadius = cornerRadiusModel,
-            blendMode = BlendMode.Multiply
-        )
-        when (panelStroke) {
-            is Stroke.WidthBrush ->
-                drawRoundRect(
-                    panelStroke.brush,
-                    cornerRadius = cornerRadiusModel,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(panelStroke.width.toPx())
-                )
-            is Stroke.WidthColor ->
-                drawRoundRect(
-                    panelStroke.color,
-                    cornerRadius = cornerRadiusModel,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(panelStroke.width.toPx())
-                )
-            null -> Unit
-        }
     }
 }
+
 @OptIn(ExperimentalGraphicsApi::class)
 @Composable
 @Preview
@@ -227,7 +223,6 @@ fun PreviewSaturationValuePanel() {
                         value = newValue
                     }
                 )
-
             }
             AlphaSlider(
                 Modifier
@@ -249,5 +244,73 @@ fun PreviewSaturationValuePanel() {
                 text = "hue : $hue\nsaturation : $saturation\nvalue: $value\nalpha : $alpha"
             )
         }
+    }
+}
+
+@SuppressLint("ViewConstructor")
+private class CompatSaturationValuePanel(context: Context) :
+    View(context) {
+
+    @FloatRange(from = 0.0, to = 360.0)
+    var hue: Float = 0f
+        set(value) {
+            field = value
+            changePanelColorShader()
+            invalidate()
+        }
+
+    @FloatRange(from = 0.0, to = 1.0)
+    var panelAlpha: Float = 1f
+        set(value) {
+            field = value
+            changePanelColorShader()
+            invalidate()
+        }
+    private val panel = RectF()
+
+    private var panelPaint = Paint().apply {
+        isAntiAlias = true
+    }
+
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        panel.set(
+            paddingLeft.toFloat(), paddingTop.toFloat(),
+            (w - paddingRight).toFloat(), (h - paddingBottom).toFloat()
+        )
+        changePanelColorShader()
+    }
+
+
+    override fun onDraw(canvas: Canvas) {
+        canvas.drawRect(panel, panelPaint)
+    }
+
+    private fun changePanelColorShader() {
+        panelPaint.shader = ComposeShader(
+            LinearGradient(
+                panel.left,
+                panel.top,
+                panel.left,
+                panel.bottom,
+                -0x1,
+                android.graphics.Color.argb(
+                    (255 * panelAlpha).toInt(),
+                    0, 0, 0
+                ),
+                Shader.TileMode.CLAMP
+            ), LinearGradient(
+                panel.left,
+                panel.top,
+                panel.right,
+                panel.top,
+                -0x1,
+                android.graphics.Color.HSVToColor(
+                    (255 * panelAlpha).toInt(),
+                    floatArrayOf(hue, 1f, 1f)
+                ),
+                Shader.TileMode.CLAMP
+            ), PorterDuff.Mode.MULTIPLY
+        )
     }
 }
