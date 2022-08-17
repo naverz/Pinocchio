@@ -13,7 +13,7 @@
 You can use Gradle :
 ```gradle
 dependencies {
-   implementation 'io.github.naverz.pinocchio:slider-compose:1.0.0'
+   implementation 'io.github.naverz.pinocchio:slider-compose:1.0.2'
 }
 ```
 

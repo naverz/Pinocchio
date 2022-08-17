@@ -6,19 +6,22 @@
 
 package io.github.naverz.pinocchio.slider.compose
 
-import android.view.MotionEvent
 import androidx.annotation.FloatRange
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.consumePositionChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
@@ -30,7 +33,6 @@ import io.github.naverz.pinocchio.slider.compose.data.Stroke
 import io.github.naverz.pinocchio.slider.compose.palette.SliderPalette
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Slider(
     modifier: Modifier = Modifier,
@@ -44,28 +46,38 @@ fun Slider(
 ) {
     var containerSize by remember { mutableStateOf(IntSize(0, 0)) }
     var thumbSize by remember { mutableStateOf(IntSize(0, 0)) }
-
     Box(modifier) {
         SubcomposeLayout(
             if (isVertical) {
-                Modifier
-                    .fillMaxHeight()
+                Modifier.fillMaxHeight()
             } else {
-                Modifier
-                    .fillMaxWidth()
+                Modifier.fillMaxWidth()
             }
-                .pointerInteropFilter {
-                    val nextValue = findNextValue(
-                        isVertical = isVertical,
-                        touchOffset = if (isVertical) it.y else it.x,
-                        maxOffset = (if (isVertical) containerSize.height else containerSize.width).toFloat(),
-                        thumbStandardLength = (if (isVertical) thumbSize.height else thumbSize.width).toFloat()
-                    )
-                    onValueChanged?.invoke(nextValue)
-                    if (it.action == MotionEvent.ACTION_UP) {
-                        onValueConfirmed?.invoke(nextValue)
+                .pointerInput(Unit) {
+                    forEachGesture {
+                        awaitPointerEventScope {
+                            awaitFirstDown()
+                            var nextValue: Float? = null
+                            do {
+                                val event: PointerEvent = awaitPointerEvent()
+                                event.changes.forEach { pointerInputChange: PointerInputChange ->
+                                    findNextValue(
+                                        isVertical = isVertical,
+                                        touchOffset = if (isVertical) pointerInputChange.position.y else pointerInputChange.position.x,
+                                        maxOffset = (if (isVertical) containerSize.height else containerSize.width).toFloat(),
+                                        thumbStandardLength = (if (isVertical) thumbSize.height else thumbSize.width).toFloat()
+                                    ).let {
+                                        nextValue = it
+                                        onValueChanged?.invoke(it)
+                                    }
+                                    pointerInputChange.consumePositionChange()
+                                }
+                            } while (event.changes.any { it.pressed })
+                            nextValue?.let { stableNextValue ->
+                                onValueConfirmed?.invoke(stableNextValue)
+                            }
+                        }
                     }
-                    return@pointerInteropFilter true
                 }
                 .align(Alignment.Center),
         ) { constraints ->

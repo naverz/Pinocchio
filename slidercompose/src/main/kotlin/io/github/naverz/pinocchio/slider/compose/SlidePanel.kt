@@ -6,30 +6,32 @@
 
 package io.github.naverz.pinocchio.slider.compose
 
-import android.view.MotionEvent
 import androidx.annotation.FloatRange
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInteropFilter
+import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.consumePositionChange
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import io.github.naverz.pinocchio.slider.compose.palette.PanelPalette
-import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 import io.github.naverz.pinocchio.slider.compose.data.Background
 import io.github.naverz.pinocchio.slider.compose.data.Stroke
+import io.github.naverz.pinocchio.slider.compose.palette.PanelPalette
+import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 
 @Composable
-@OptIn(ExperimentalComposeUiApi::class)
 fun SlidePanel(
     modifier: Modifier = Modifier,
     @FloatRange(from = 0.0, to = 1.0)
@@ -50,31 +52,47 @@ fun SlidePanel(
 ) {
     var containerSize by remember { mutableStateOf(IntSize(0, 0)) }
     var thumbSize by remember { mutableStateOf(IntSize(0, 0)) }
+    SubcomposeLayout(
+        modifier.pointerInput(Unit) {
+            forEachGesture {
+                awaitPointerEventScope {
+                    awaitFirstDown()
+                    val halfThumbWidth = thumbSize.width.toFloat() / 2
+                    val halfThumbHeight = thumbSize.height.toFloat() / 2
+                    val panelRect = Rect(
+                        halfThumbWidth,
+                        halfThumbHeight,
+                        containerSize.width - halfThumbWidth,
+                        containerSize.height - halfThumbHeight
+                    )
+                    var nextTouchPoint: Offset? = null
+                    do {
+                        val event: PointerEvent = awaitPointerEvent()
+                        event.changes.forEach { pointerInputChange: PointerInputChange ->
+                            findNextValue(
+                                containerSize = containerSize,
+                                panelRect = panelRect,
+                                touchPoint = Offset(
+                                    x = pointerInputChange.position.x,
+                                    y = pointerInputChange.position.y
+                                ),
+                                halfThumbWidth = halfThumbWidth,
+                                halfThumbHeight = halfThumbHeight
+                            ).let {
+                                nextTouchPoint = it
+                                onValueChanged?.invoke(it.x, it.y)
+                            }
+                            pointerInputChange.consumePositionChange()
+                        }
+                    } while (event.changes.any { it.pressed })
+                    nextTouchPoint?.let { stableNextTouchPoint ->
+                        onValueConfirmed?.invoke(stableNextTouchPoint.x, stableNextTouchPoint.y)
+                    }
+                }
+            }
+        }
 
-    val halfThumbWidth = remember(thumbSize) { thumbSize.width.toFloat() / 2 }
-    val halfThumbHeight = remember(thumbSize) { thumbSize.height.toFloat() / 2 }
-    val panelRect = remember(thumbSize, containerSize) {
-        Rect(
-            halfThumbWidth,
-            halfThumbHeight,
-            containerSize.width - halfThumbWidth,
-            containerSize.height - halfThumbHeight
-        )
-    }
-    SubcomposeLayout(modifier
-        .pointerInteropFilter {
-            val nextTouchPoint = findNextValue(
-                containerSize = containerSize,
-                panelRect = panelRect,
-                touchPoint = Offset(it.x, it.y),
-                halfThumbWidth = halfThumbWidth,
-                halfThumbHeight = halfThumbHeight
-            )
-            onValueChanged?.invoke(nextTouchPoint.x, nextTouchPoint.y)
-            if (it.action == MotionEvent.ACTION_UP)
-                onValueConfirmed?.invoke(nextTouchPoint.x, nextTouchPoint.y)
-            return@pointerInteropFilter true
-        }) { constraints ->
+    ) { constraints ->
         val fixedConstraints = constraints.copy(minWidth = 0, minHeight = 0)
         val thumbComposable: @Composable () -> Unit = { thumb.invoke() }
         val panelComposableWithPadding: @Composable (thumbSize: IntSize) -> Unit = {
