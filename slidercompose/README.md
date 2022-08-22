@@ -105,7 +105,7 @@ SlidePanel(
 ```
 
 ## How to remove the thumb space
-Slider, and SliderPanel have a padding amount of the half thumb size to prevent the thumb to be out of Composable area. But You can use the layout function in Modifier as follows to fit your Slider, SliderPanel area to your content container.
+Slider and SliderPanel have a padding amount of the half thumb size to prevent the thumb to be out of Composable area. But You can use the layout function in Modifier as follows to fit your Slider, SliderPanel area to your content container.
 
 
 ```kotlin

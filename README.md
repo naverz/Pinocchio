@@ -1,5 +1,5 @@
 # Pinocchio
-Pinocchio is a group of libraries for various common UI components. It could contain Composable, View, and **everything related to UI.**\ 
+Pinocchio is a group of libraries for various common UI components. It could contain Composable, View, and **everything related to UI.**\
 All UI components can be implemented separately. 
 
 ## [Slider compose](slidercompose/)
