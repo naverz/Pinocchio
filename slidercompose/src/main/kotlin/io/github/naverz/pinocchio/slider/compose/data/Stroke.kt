@@ -7,6 +7,7 @@
 package io.github.naverz.pinocchio.slider.compose.data
 
 import androidx.compose.foundation.border
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -14,7 +15,10 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.Dp
 
 sealed class Stroke(open val width: Dp) {
+    @Immutable
     data class WidthColor(override val width: Dp, val color: Color) : Stroke(width)
+
+    @Immutable
     data class WidthBrush(override val width: Dp, val brush: Brush) : Stroke(width)
 }
 
