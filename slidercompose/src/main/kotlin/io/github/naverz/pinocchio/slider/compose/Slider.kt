@@ -322,3 +322,67 @@ fun PreviewSlider() {
     }
 
 }
+
+@Preview
+@Composable
+fun PreviewBalancingSlider() {
+    var value by remember { mutableStateOf(0.5f) }
+    Column {
+        Spacer(modifier = Modifier.height(15.dp))
+        Slider(
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp),
+            value = value,
+            slider = {
+                SliderPalette.BalancingSlider(
+                    value = value,
+                    sliderWidth = 2.dp,
+                    isVertical = false,
+                    activeBrush = SolidColor(Color(0xff292930)),
+                    inactivateBrush = SolidColor(Color(0xffE0E0E1)),
+                    sliderCornerShape = RoundedCornerShape(4.dp),
+                )
+            },
+            isVertical = false,
+            thumb = {
+                ThumbPalette.CircleThumb(
+                    thumbRadius = 8.dp,
+                    color = Color.White,
+                    thumbElevation = 4f.dp
+                )
+            },
+            onValueChanged = { value = it },
+        )
+        Slider(
+            Modifier
+                .height(150.dp)
+                .padding(horizontal = 10.dp),
+            value = value,
+            slider = {
+                SliderPalette.BalancingSlider(
+                    value = value,
+                    sliderWidth = 2.dp,
+                    isVertical = true,
+                    activeBrush = SolidColor(Color(0xff292930)),
+                    inactivateBrush = SolidColor(Color(0xffE0E0E1)),
+                    sliderCornerShape = RoundedCornerShape(4.dp),
+                )
+            },
+            isVertical = true,
+            thumb = {
+                ThumbPalette.CircleThumb(
+                    thumbRadius = 8.dp,
+                    color = Color.White,
+                    thumbElevation = 4f.dp
+                )
+            },
+            onValueChanged = { value = it },
+        )
+        Box(Modifier.fillMaxWidth()) {
+            BasicText(
+                modifier = Modifier.align(Alignment.Center), text = "Value : $value"
+            )
+        }
+    }
+}

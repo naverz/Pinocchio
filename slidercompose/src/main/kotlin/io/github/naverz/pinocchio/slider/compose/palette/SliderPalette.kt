@@ -13,11 +13,9 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -25,10 +23,152 @@ import io.github.naverz.pinocchio.slider.compose.data.Background
 import io.github.naverz.pinocchio.slider.compose.data.Stroke
 import io.github.naverz.pinocchio.slider.compose.data.background
 import io.github.naverz.pinocchio.slider.compose.data.stroke
-import io.github.naverz.pinocchio.slider.compose.defaultCornerRadius
-import io.github.naverz.pinocchio.slider.compose.defaultSliderWidth
 
 object SliderPalette {
+
+    @Composable
+    fun BalancingSlider(
+        @FloatRange(from = 0.0, to = 1.0)
+        value: Float,
+        isVertical: Boolean,
+        sliderWidth: Dp,
+        activeBrush: Brush,
+        inactivateBrush: Brush,
+        sliderStroke: Stroke? = null,
+        sliderElevation: Dp? = null,
+        sliderCornerShape: Shape? = null,
+    ) {
+        val safeValue = value.coerceIn(0f, 1f)
+        val modifier = Modifier
+            .run {
+                if (isVertical) {
+                    fillMaxHeight()
+                        .width(sliderWidth)
+                } else {
+                    fillMaxWidth()
+                        .height(sliderWidth)
+                }
+            }.run {
+                if (sliderElevation != null) {
+                    shadow(sliderElevation, sliderCornerShape ?: RectangleShape)
+                } else {
+                    this
+                }
+            }.run {
+                if (sliderStroke != null) {
+                    stroke(sliderStroke, sliderCornerShape ?: RectangleShape)
+                } else {
+                    this
+                }
+            }.run {
+                if (sliderCornerShape != null) {
+                    clip(sliderCornerShape)
+                } else {
+                    this
+                }
+            }
+        if (safeValue == 0.5f) {
+            Box(
+                modifier
+                    .background(inactivateBrush)
+            )
+        } else if (!isVertical) {
+            Row(modifier) {
+                if (safeValue < 0.5) {
+                    if (safeValue > 0) {
+                        Box(
+                            Modifier
+                                .weight(safeValue)
+                                .fillMaxHeight()
+                                .background(inactivateBrush)
+                        )
+                    }
+                    Box(
+                        Modifier
+                            .weight(0.5f - safeValue)
+                            .fillMaxHeight()
+                            .background(activeBrush)
+                    )
+                    Box(
+                        Modifier
+                            .weight(0.5f)
+                            .fillMaxHeight()
+                            .background(inactivateBrush)
+                    )
+                } else {
+                    Box(
+                        Modifier
+                            .weight(0.5f)
+                            .fillMaxHeight()
+                            .background(inactivateBrush)
+                    )
+                    Box(
+                        Modifier
+                            .weight(safeValue - 0.5f)
+                            .fillMaxHeight()
+                            .background(activeBrush)
+                    )
+                    if (safeValue < 1f) {
+                        Box(
+                            Modifier
+                                .weight(1f - safeValue)
+                                .fillMaxHeight()
+                                .background(inactivateBrush)
+                        )
+                    }
+                }
+            }
+
+        } else {
+            Column(modifier) {
+                if (safeValue < 0.5f) {
+                    Box(
+                        Modifier
+                            .weight(0.5f)
+                            .fillMaxWidth()
+                            .background(inactivateBrush)
+                    )
+                    Box(
+                        Modifier
+                            .weight(0.5f - safeValue)
+                            .fillMaxWidth()
+                            .background(activeBrush)
+                    )
+                    if (safeValue > 0f) {
+                        Box(
+                            Modifier
+                                .weight(safeValue)
+                                .fillMaxWidth()
+                                .background(inactivateBrush)
+                        )
+                    }
+
+                } else {
+                    if (safeValue < 1f) {
+                        Box(
+                            Modifier
+                                .weight(1f - safeValue)
+                                .fillMaxWidth()
+                                .background(inactivateBrush)
+                        )
+                    }
+                    Box(
+                        Modifier
+                            .weight(safeValue - 0.5f)
+                            .fillMaxWidth()
+                            .background(activeBrush)
+                    )
+                    Box(
+                        Modifier
+                            .weight(0.5f)
+                            .fillMaxWidth()
+                            .background(inactivateBrush)
+                    )
+                }
+            }
+        }
+    }
+
     @Composable
     fun NormalSlider(
         isVertical: Boolean,
@@ -134,6 +274,20 @@ object SliderPalette {
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun PreviewBalancingSliderPalette() {
+    SliderPalette.BalancingSlider(
+        value = 0.3f,
+        isVertical = false,
+        sliderWidth = 30.dp,
+        activeBrush = SolidColor(Color.Red),
+        inactivateBrush = SolidColor(Color.Gray),
+        sliderCornerShape = RoundedCornerShape(21.dp),
+        sliderStroke = Stroke.WidthColor(3.dp, Color.White)
+    )
 }
 
 @Preview
