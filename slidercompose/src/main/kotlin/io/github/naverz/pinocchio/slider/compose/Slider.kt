@@ -53,7 +53,7 @@ fun Slider(
             } else {
                 Modifier.fillMaxWidth()
             }
-                .pointerInput(Unit) {
+                .pointerInput(onValueChanged, onValueConfirmed) {
                     forEachGesture {
                         awaitPointerEventScope {
                             awaitFirstDown()

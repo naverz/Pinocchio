@@ -53,7 +53,7 @@ fun SlidePanel(
     var containerSize by remember { mutableStateOf(IntSize(0, 0)) }
     var thumbSize by remember { mutableStateOf(IntSize(0, 0)) }
     SubcomposeLayout(
-        modifier.pointerInput(Unit) {
+        modifier.pointerInput(onValueChanged, onValueConfirmed) {
             forEachGesture {
                 awaitPointerEventScope {
                     awaitFirstDown()
