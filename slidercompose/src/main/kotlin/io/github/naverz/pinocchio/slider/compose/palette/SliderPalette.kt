@@ -213,64 +213,103 @@ object SliderPalette {
         sliderElevation: Dp? = null,
         sliderCornerShape: RoundedCornerShape = RoundedCornerShape(0.dp),
     ) {
-        Row(
-            modifier = Modifier
-                .run {
-                    if (isVertical) {
-                        fillMaxHeight()
-                            .width(sliderWidth)
-                    } else {
-                        fillMaxWidth()
-                            .height(sliderWidth)
-                    }
-                }.run {
-                    if (sliderElevation != null) shadow(sliderElevation, sliderCornerShape)
-                    else this
-                }.run {
-                    if (sliderStroke != null) {
-                        stroke(sliderStroke, sliderCornerShape)
-                    } else {
-                        this
-                    }
+        val containerModifier = Modifier
+            .run {
+                if (isVertical) {
+                    fillMaxHeight()
+                        .width(sliderWidth)
+                } else {
+                    fillMaxWidth()
+                        .height(sliderWidth)
                 }
-        ) {
-            if (activeValue != 0f) {
-                Box(
-                    Modifier
-                        .weight(activeValue.coerceAtLeast(0f))
-                        .fillMaxHeight()
-                        .background(
-                            activeBrush,
-                            if (activeValue != 1f) {
-                                sliderCornerShape.copy(
-                                    topEnd = CornerSize(0.dp),
-                                    bottomEnd = CornerSize(0.dp)
-                                )
-                            } else {
-                                sliderCornerShape
-                            }
-                        )
-                )
+            }.run {
+                if (sliderElevation != null) shadow(sliderElevation, sliderCornerShape)
+                else this
+            }.run {
+                if (sliderStroke != null) {
+                    stroke(sliderStroke, sliderCornerShape)
+                } else {
+                    this
+                }
             }
 
-
-            if (activeValue != 1f) {
-                Box(
-                    Modifier
-                        .weight(1 - activeValue.coerceAtLeast(0f))
-                        .fillMaxHeight()
-                        .background(
-                            inactivateBrush,
-                            if (activeValue != 0f) {
-                                sliderCornerShape.copy(
-                                    topStart = CornerSize(0.dp),
-                                    bottomStart = CornerSize(0.dp)
-                                )
-                            } else {
-                                sliderCornerShape
-                            }
-                        )
-                )
+        if (isVertical) {
+            Column(modifier = containerModifier) {
+                if (activeValue != 1f) {
+                    Box(
+                        Modifier
+                            .weight(1 - activeValue.coerceAtLeast(0f))
+                            .fillMaxWidth()
+                            .background(
+                                inactivateBrush,
+                                if (activeValue != 0f) {
+                                    sliderCornerShape.copy(
+                                        topStart = CornerSize(0.dp),
+                                        bottomStart = CornerSize(0.dp)
+                                    )
+                                } else {
+                                    sliderCornerShape
+                                }
+                            )
+                    )
+                }
+                if (activeValue != 0f) {
+                    Box(
+                        Modifier
+                            .weight(activeValue.coerceAtLeast(0f))
+                            .fillMaxWidth()
+                            .background(
+                                activeBrush,
+                                if (activeValue != 1f) {
+                                    sliderCornerShape.copy(
+                                        topEnd = CornerSize(0.dp),
+                                        bottomEnd = CornerSize(0.dp)
+                                    )
+                                } else {
+                                    sliderCornerShape
+                                }
+                            )
+                    )
+                }
+            }
+        } else {
+            Row(modifier = containerModifier) {
+                if (activeValue != 0f) {
+                    Box(
+                        Modifier
+                            .weight(activeValue.coerceAtLeast(0f))
+                            .fillMaxHeight()
+                            .background(
+                                activeBrush,
+                                if (activeValue != 1f) {
+                                    sliderCornerShape.copy(
+                                        topEnd = CornerSize(0.dp),
+                                        bottomEnd = CornerSize(0.dp)
+                                    )
+                                } else {
+                                    sliderCornerShape
+                                }
+                            )
+                    )
+                }
+                if (activeValue != 1f) {
+                    Box(
+                        Modifier
+                            .weight(1 - activeValue.coerceAtLeast(0f))
+                            .fillMaxHeight()
+                            .background(
+                                inactivateBrush,
+                                if (activeValue != 0f) {
+                                    sliderCornerShape.copy(
+                                        topStart = CornerSize(0.dp),
+                                        bottomStart = CornerSize(0.dp)
+                                    )
+                                } else {
+                                    sliderCornerShape
+                                }
+                            )
+                    )
+                }
             }
         }
     }

@@ -260,6 +260,31 @@ fun PreviewSlider() {
         )
         Spacer(modifier = Modifier.height(30.dp))
         Row {
+            Slider(
+                Modifier
+                    .height(200.dp)
+                    .padding(horizontal = 10.dp),
+                value = value,
+                slider = {
+                    SliderPalette.ActiveSlider(
+                        activeValue = value,
+                        sliderWidth = 2.dp,
+                        isVertical = true,
+                        activeBrush = SolidColor(Color(0xff292930)),
+                        inactivateBrush = SolidColor(Color(0xffE0E0E1)),
+                        sliderCornerShape = RoundedCornerShape(4.dp),
+                    )
+                },
+                isVertical = true,
+                thumb = {
+                    ThumbPalette.CircleThumb(
+                        thumbRadius = 8.dp,
+                        color = Color.White,
+                        thumbElevation = 4f.dp
+                    )
+                },
+                onValueChanged = { value = it },
+            )
             Spacer(modifier = Modifier.width(10.dp))
             Slider(
                 Modifier.height(200.dp),
