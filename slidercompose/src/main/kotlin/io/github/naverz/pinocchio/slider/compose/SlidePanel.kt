@@ -52,8 +52,10 @@ fun SlidePanel(
 ) {
     var containerSize by remember { mutableStateOf(IntSize(0, 0)) }
     var thumbSize by remember { mutableStateOf(IntSize(0, 0)) }
+    val updatedOnValueChanged by rememberUpdatedState(newValue = onValueChanged)
+    val updatedOnValueConfirmed by rememberUpdatedState(newValue = onValueConfirmed)
     SubcomposeLayout(
-        modifier.pointerInput(onValueChanged, onValueConfirmed) {
+        modifier.pointerInput(Unit) {
             forEachGesture {
                 awaitPointerEventScope {
                     awaitFirstDown()
@@ -80,13 +82,15 @@ fun SlidePanel(
                                 halfThumbHeight = halfThumbHeight
                             ).let {
                                 nextTouchPoint = it
-                                onValueChanged?.invoke(it.x, it.y)
+                                updatedOnValueChanged?.invoke(it.x, it.y)
                             }
                             pointerInputChange.consumePositionChange()
                         }
                     } while (event.changes.any { it.pressed })
                     nextTouchPoint?.let { stableNextTouchPoint ->
-                        onValueConfirmed?.invoke(stableNextTouchPoint.x, stableNextTouchPoint.y)
+                        updatedOnValueConfirmed?.invoke(
+                            stableNextTouchPoint.x, stableNextTouchPoint.y
+                        )
                     }
                 }
             }

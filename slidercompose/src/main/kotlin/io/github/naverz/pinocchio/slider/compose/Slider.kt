@@ -7,6 +7,8 @@
 package io.github.naverz.pinocchio.slider.compose
 
 import androidx.annotation.FloatRange
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.*
@@ -14,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -46,6 +49,8 @@ fun Slider(
 ) {
     var containerSize by remember { mutableStateOf(IntSize(0, 0)) }
     var thumbSize by remember { mutableStateOf(IntSize(0, 0)) }
+    val updatedOnValueChanged by rememberUpdatedState(newValue = onValueChanged)
+    val updatedOnValueConfirmed by rememberUpdatedState(newValue = onValueConfirmed)
     Box(modifier) {
         SubcomposeLayout(
             if (isVertical) {
@@ -53,7 +58,7 @@ fun Slider(
             } else {
                 Modifier.fillMaxWidth()
             }
-                .pointerInput(onValueChanged, onValueConfirmed) {
+                .pointerInput(isVertical) {
                     forEachGesture {
                         awaitPointerEventScope {
                             awaitFirstDown()
@@ -68,13 +73,13 @@ fun Slider(
                                         thumbStandardLength = (if (isVertical) thumbSize.height else thumbSize.width).toFloat()
                                     ).let {
                                         nextValue = it
-                                        onValueChanged?.invoke(it)
+                                        updatedOnValueChanged?.invoke(it)
                                     }
                                     pointerInputChange.consumePositionChange()
                                 }
                             } while (event.changes.any { it.pressed })
                             nextValue?.let { stableNextValue ->
-                                onValueConfirmed?.invoke(stableNextValue)
+                                updatedOnValueConfirmed?.invoke(stableNextValue)
                             }
                         }
                     }
@@ -200,7 +205,7 @@ private fun findNextValue(
 
 @Preview
 @Composable
-fun PreviewSlider() {
+private fun PreviewSlider() {
     var value by remember {
         mutableStateOf(0f)
     }
@@ -350,7 +355,7 @@ fun PreviewSlider() {
 
 @Preview
 @Composable
-fun PreviewBalancingSlider() {
+private fun PreviewBalancingSlider() {
     var value by remember { mutableStateOf(0.5f) }
     Column {
         Spacer(modifier = Modifier.height(15.dp))
@@ -408,6 +413,65 @@ fun PreviewBalancingSlider() {
             BasicText(
                 modifier = Modifier.align(Alignment.Center), text = "Value : $value"
             )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewStateTest() {
+    var tagWithValue by remember { mutableStateOf(mapOf("a" to 0f, "b" to 0f, "c" to 0f)) }
+    var tags by remember { mutableStateOf(listOf("a", "b", "c")) }
+
+    Column(Modifier.fillMaxWidth()) {
+        tags.forEach { tag ->
+            Slider(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 10.dp),
+                value = tagWithValue[tag] ?: 0f,
+                slider = {
+                    SliderPalette.BalancingSlider(
+                        value = tagWithValue[tag] ?: 0f,
+                        sliderWidth = 2.dp,
+                        isVertical = false,
+                        activeBrush = SolidColor(Color(0xff292930)),
+                        inactivateBrush = SolidColor(Color(0xffE0E0E1)),
+                        sliderCornerShape = RoundedCornerShape(4.dp),
+                    )
+                },
+                isVertical = false,
+                thumb = {
+                    ThumbPalette.CircleThumb(
+                        thumbRadius = 8.dp,
+                        color = Color.White,
+                        thumbElevation = 4f.dp
+                    )
+                },
+                onValueChanged = {
+                    tagWithValue = tagWithValue.toMutableMap()
+                        .apply { this[tag] = it }
+                },
+            )
+            BasicText(text = "tag = $tag, value =${tagWithValue[tag]}")
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+        Spacer(modifier = Modifier.height(10.dp))
+        BasicText(text = "currentTags : $tags\ntagWithValue = $tagWithValue")
+        Spacer(modifier = Modifier.height(10.dp))
+        Box(
+            Modifier
+                .padding(top = 20.dp)
+                .background(Color.Red, RoundedCornerShape(4.dp))
+                .align(CenterHorizontally)
+                .clickable {
+                    val newTags = if ("a" in tags) listOf("d", "e", "f") else listOf("a", "b", "c")
+                    tags = newTags
+                    tagWithValue = newTags.associateWith { 0f }
+                }
+                .padding(10.dp)
+        ) {
+            BasicText(text = "Change the tags states!")
         }
     }
 }
