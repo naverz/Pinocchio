@@ -4,7 +4,7 @@ All UI components can be implemented separately.
 
 ## [Slider compose](slidercompose/)
 
- <img src="slidercompose/static/sliderSample.gif" width="300" > | <img src="slidercompose/static/panelSlider.gif" width="300" > 
+ <img src="slidercompose/static/sliderSample.gif" width="300" > | <img src="slidercompose/static/balancingSlider.gif" width="300" > | <img src="slidercompose/static/panelSlider.gif" width="300" > 
 * Support Only Compose
 * Customizable Slider and Slide panel
 

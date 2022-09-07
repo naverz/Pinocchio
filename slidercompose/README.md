@@ -1,6 +1,9 @@
 # Slider compose 
 
- <img src="static/sliderSample.gif" width="300" > | <img src="static/panelSlider.gif" width="300" > 
+ <img src="static/sliderSample.gif" width="300" > | 
+<img src="static/balancingSlider.gif" width="300" > | 
+ <img src="static/panelSlider.gif" width="300" > |
+
 
 ## Compose version
 
@@ -173,6 +176,21 @@ SliderPalette.NormalSlider(
 )
 ```
 
+<img src="static/balancingSlider2.gif" width="250" >
+
+```kotlin
+SliderPalette.BalancingSlider(
+    value = value,
+    sliderWidth = 2.dp,
+    isVertical = false,
+    activeBrush = SolidColor(Color(0xff292930)),
+    inactivateBrush = SolidColor(Color(0xffE0E0E1)),
+    sliderCornerShape = RoundedCornerShape(4.dp),
+)
+
+```
+
+
 ### Panel Palette
 <img src="static/panelPalette.png" width="250" >
 
@@ -213,3 +231,6 @@ ThumbPalette.RectThumb(
 )
 ```
 
+## All composable has previews!
+
+Search with the `@Preview` keyword in this project!
