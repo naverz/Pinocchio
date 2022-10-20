@@ -116,9 +116,9 @@ fun Slider(
                 if (isVertical) sliderPlaceable.height - thumbPlaceable.height
                 else sliderPlaceable.width - thumbPlaceable.width
             layout(containerSize.width, containerSize.height) {
-                sliderPlaceable.placeRelative(0, 0)
+                sliderPlaceable.place(0, 0)
                 if (isThumbInSlider) {
-                    thumbPlaceable.placeRelative(
+                    thumbPlaceable.place(
                         x = if (isVertical)
                             (sliderPlaceable.width - thumbPlaceable.width) / 2
                         else
@@ -129,7 +129,7 @@ fun Slider(
                             (sliderPlaceable.height - thumbPlaceable.height) / 2
                     )
                 } else {
-                    thumbPlaceable.placeRelative(
+                    thumbPlaceable.place(
                         x = if (isVertical) 0 else (value * sliderSizeWithoutPadding).toInt(),
                         y = if (isVertical) ((1 - value) * sliderSizeWithoutPadding).toInt() else 0
                     )

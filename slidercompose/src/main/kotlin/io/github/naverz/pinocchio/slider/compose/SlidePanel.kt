@@ -113,8 +113,8 @@ fun SlidePanel(
                 .map { it.measure(fixedConstraints) }.first()
         containerSize = IntSize(panelWithPaddingPlaceable.width, panelWithPaddingPlaceable.height)
         layout(panelWithPaddingPlaceable.width, panelWithPaddingPlaceable.height) {
-            panelWithPaddingPlaceable.placeRelative(0, 0)
-            thumbPlaceable.placeRelative(
+            panelWithPaddingPlaceable.place(0, 0)
+            thumbPlaceable.place(
                 (x * (panelWithPaddingPlaceable.width - thumbPlaceable.width)).toInt(),
                 ((1 - y) * (panelWithPaddingPlaceable.height - thumbPlaceable.height)).toInt()
             )
