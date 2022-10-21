@@ -54,6 +54,7 @@ fun SlidePanel(
     var thumbSize by remember { mutableStateOf(IntSize(0, 0)) }
     val updatedOnValueChanged by rememberUpdatedState(newValue = onValueChanged)
     val updatedOnValueConfirmed by rememberUpdatedState(newValue = onValueConfirmed)
+    val isRtl = isRtl()
     SubcomposeLayout(
         modifier.pointerInput(Unit) {
             forEachGesture {
@@ -72,6 +73,7 @@ fun SlidePanel(
                         val event: PointerEvent = awaitPointerEvent()
                         event.changes.forEach { pointerInputChange: PointerInputChange ->
                             findNextValue(
+                                isRtl = isRtl,
                                 containerSize = containerSize,
                                 panelRect = panelRect,
                                 touchPoint = Offset(
@@ -113,8 +115,8 @@ fun SlidePanel(
                 .map { it.measure(fixedConstraints) }.first()
         containerSize = IntSize(panelWithPaddingPlaceable.width, panelWithPaddingPlaceable.height)
         layout(panelWithPaddingPlaceable.width, panelWithPaddingPlaceable.height) {
-            panelWithPaddingPlaceable.place(0, 0)
-            thumbPlaceable.place(
+            panelWithPaddingPlaceable.placeRelative(0, 0)
+            thumbPlaceable.placeRelative(
                 (x * (panelWithPaddingPlaceable.width - thumbPlaceable.width)).toInt(),
                 ((1 - y) * (panelWithPaddingPlaceable.height - thumbPlaceable.height)).toInt()
             )
@@ -123,6 +125,7 @@ fun SlidePanel(
 }
 
 private fun findNextValue(
+    isRtl: Boolean,
     containerSize: IntSize,
     panelRect: Rect,
     touchPoint: Offset,
@@ -133,16 +136,16 @@ private fun findNextValue(
         touchPoint.x < panelRect.left -> {
             when {
                 touchPoint.y < panelRect.top -> {
-                    Offset(0f, 1f)
+                    Offset(if (isRtl) 1f else 0f, 1f)
                 }
                 touchPoint.y > panelRect.bottom -> {
-                    Offset(0f, 0f)
+                    Offset(if (isRtl) 1f else 0f, 0f)
                 }
                 else -> {
                     val newY =
                         1 - (touchPoint.y - halfThumbHeight) / (containerSize.height - halfThumbHeight * 2)
                     Offset(
-                        0f,
+                        if (isRtl) 1f else 0f,
                         newY.coerceIn(0f, 1f)
                     )
                 }
@@ -151,16 +154,16 @@ private fun findNextValue(
         touchPoint.x > panelRect.right -> {
             when {
                 touchPoint.y < panelRect.top -> {
-                    Offset(1f, 1f)
+                    Offset(if (isRtl) 0f else 1f, 1f)
                 }
                 touchPoint.y > panelRect.bottom -> {
-                    Offset(1f, 0f)
+                    Offset(if (isRtl) 0f else 1f, 0f)
                 }
                 else -> {
                     val newY =
                         1 - (touchPoint.y - halfThumbHeight) / (containerSize.height - halfThumbHeight * 2)
                     Offset(
-                        1f,
+                        if (isRtl) 0f else 1f,
                         newY.coerceIn(0f, 1f)
                     )
                 }
@@ -169,16 +172,16 @@ private fun findNextValue(
         touchPoint.y > panelRect.bottom -> {
             when {
                 touchPoint.x < panelRect.left -> {
-                    Offset(0f, 0f)
+                    Offset(if (isRtl) 1f else 0f, 0f)
                 }
                 touchPoint.x > panelRect.right -> {
-                    Offset(1f, 0f)
+                    Offset(if (isRtl) 0f else 1f, 0f)
                 }
                 else -> {
                     val newX =
                         (touchPoint.x - halfThumbWidth) / (containerSize.width - halfThumbWidth * 2)
                     Offset(
-                        newX.coerceIn(0f, 1f),
+                        if (isRtl) 1 - newX.coerceIn(0f, 1f) else newX.coerceIn(0f, 1f),
                         0f
                     )
                 }
@@ -187,16 +190,16 @@ private fun findNextValue(
         touchPoint.y < panelRect.top -> {
             when {
                 touchPoint.x < panelRect.left -> {
-                    Offset(0f, 1f)
+                    Offset(if (isRtl) 1f else 0f, 1f)
                 }
                 touchPoint.x > panelRect.right -> {
-                    Offset(1f, 1f)
+                    Offset(if (isRtl) 0f else 1f, 1f)
                 }
                 else -> {
                     val newX =
                         (touchPoint.x - halfThumbWidth) / (containerSize.width - halfThumbWidth * 2)
                     Offset(
-                        newX.coerceIn(0f, 1f),
+                        if (isRtl) 1 - newX.coerceIn(0f, 1f) else newX.coerceIn(0f, 1f),
                         1f
                     )
                 }
@@ -207,7 +210,7 @@ private fun findNextValue(
             val newY =
                 1 - (touchPoint.y - halfThumbHeight) / (containerSize.height - halfThumbHeight * 2)
             Offset(
-                newX.coerceIn(0f, 1f),
+                if (isRtl) 1 - newX.coerceIn(0f, 1f) else newX.coerceIn(0f, 1f),
                 newY.coerceIn(0f, 1f)
             )
         }

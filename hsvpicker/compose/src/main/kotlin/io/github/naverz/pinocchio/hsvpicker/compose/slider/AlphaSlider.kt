@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import io.github.naverz.pinocchio.hsvpicker.compose.isRtl
 import io.github.naverz.pinocchio.slider.compose.*
 import io.github.naverz.pinocchio.slider.compose.palette.SliderPalette
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
@@ -39,6 +40,18 @@ fun AlphaSlider(
     onAlphaChanged: ((alpha: Float) -> Unit)? = null,
     onAlphaConfirmed: ((alpha: Float) -> Unit)? = null,
 ) {
+    val isRtl = isRtl()
+    val colors = if (isRtl) {
+        listOf(
+            Color(0f, 0f, 0f, 1f),
+            Color(0f, 0f, 0f, 0f)
+        )
+    } else {
+        listOf(
+            Color(0f, 0f, 0f, if (isVertical) 1f else 0f),
+            Color(0f, 0f, 0f, if (isVertical) 0f else 1f)
+        )
+    }
     Slider(
         modifier = modifier,
         value = alpha,
@@ -49,10 +62,7 @@ fun AlphaSlider(
                 sliderWidth = sliderWidth,
                 sliderBackground = Background.BrushShape(
                     Brush.linearGradient(
-                        colors = listOf(
-                            Color(0f, 0f, 0f, if (isVertical) 1f else 0f),
-                            Color(0f, 0f, 0f, if (isVertical) 0f else 1f)
-                        ), tileMode = TileMode.Repeated
+                        colors = colors, tileMode = TileMode.Repeated
                     ), RoundedCornerShape(sliderCornerRadius)
                 ),
                 sliderStroke = sliderStroke,

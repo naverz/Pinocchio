@@ -8,16 +8,31 @@ package io.github.naverz.pinocchio.hsvpicker.compose.panel
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.*
+import android.graphics.Canvas
+import android.graphics.ComposeShader
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.RectF
+import android.graphics.Shader
 import android.view.View
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,10 +45,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import io.github.naverz.pinocchio.hsvpicker.compose.isRtl
 import io.github.naverz.pinocchio.hsvpicker.compose.slider.AlphaSlider
 import io.github.naverz.pinocchio.hsvpicker.compose.slider.HueSlider
-import io.github.naverz.pinocchio.slider.compose.*
+import io.github.naverz.pinocchio.slider.compose.DEFAULT_ALPHA
+import io.github.naverz.pinocchio.slider.compose.SlidePanel
 import io.github.naverz.pinocchio.slider.compose.data.Stroke
+import io.github.naverz.pinocchio.slider.compose.defaultCornerRadius
+import io.github.naverz.pinocchio.slider.compose.defaultThumbSize
+import io.github.naverz.pinocchio.slider.compose.defaultThumbStroke
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 
 @Composable
@@ -121,7 +141,6 @@ fun SaturationValuePanel(
     )
 }
 
-
 @Composable
 private fun BaseSaturationValuePanel(
     @FloatRange(from = 0.0, to = 360.0)
@@ -132,6 +151,7 @@ private fun BaseSaturationValuePanel(
     panelStroke: Stroke? = null,
     panelElevation: Dp? = null
 ) {
+    val isRtl = isRtl()
     Box(
         Modifier
             .run {
@@ -162,11 +182,12 @@ private fun BaseSaturationValuePanel(
             .clip(RoundedCornerShape(cornerRadius))) {
         AndroidView(
             factory = {
-                CompatSaturationValuePanel(it)
+                CompatSaturationValuePanel(it, isRtl)
             },
             update = { panel ->
                 panel.hue = hue
                 panel.panelAlpha = alpha
+                panel.isRtl = isRtl
             }
         )
     }
@@ -248,8 +269,15 @@ fun PreviewSaturationValuePanel() {
 }
 
 @SuppressLint("ViewConstructor")
-private class CompatSaturationValuePanel(context: Context) :
+private class CompatSaturationValuePanel(context: Context, rtl: Boolean) :
     View(context) {
+
+    var isRtl: Boolean = rtl
+        set(value) {
+            field = value
+            changePanelColorShader()
+            invalidate()
+        }
 
     @FloatRange(from = 0.0, to = 360.0)
     var hue: Float = 0f
@@ -289,9 +317,9 @@ private class CompatSaturationValuePanel(context: Context) :
     private fun changePanelColorShader() {
         panelPaint.shader = ComposeShader(
             LinearGradient(
-                panel.left,
+                if (isRtl) panel.right else panel.left,
                 panel.top,
-                panel.left,
+                if (isRtl) panel.right else panel.left,
                 panel.bottom,
                 -0x1,
                 android.graphics.Color.argb(
@@ -300,9 +328,9 @@ private class CompatSaturationValuePanel(context: Context) :
                 ),
                 Shader.TileMode.CLAMP
             ), LinearGradient(
-                panel.left,
+                if (isRtl) panel.right else panel.left,
                 panel.top,
-                panel.right,
+                if (isRtl) panel.left else panel.right,
                 panel.top,
                 -0x1,
                 android.graphics.Color.HSVToColor(

@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import io.github.naverz.pinocchio.hsvpicker.compose.isRtl
 import io.github.naverz.pinocchio.slider.compose.*
 import io.github.naverz.pinocchio.slider.compose.palette.SliderPalette
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
@@ -41,6 +42,7 @@ fun HueSlider(
     onHueConfirmed: ((hue: Float) -> Unit)? = null,
 ) {
 
+    val isRtl = isRtl()
     val brush = remember(isVertical) {
         if (isVertical) {
             Brush.verticalGradient(
@@ -55,17 +57,31 @@ fun HueSlider(
                 ), tileMode = TileMode.Repeated
             )
         } else {
-            Brush.horizontalGradient(
-                listOf(
-                    Color.hsv(0f, 1f, 1f),
-                    Color.hsv(60f, 1f, 1f),
-                    Color.hsv(120f, 1f, 1f),
-                    Color.hsv(180f, 1f, 1f),
-                    Color.hsv(240f, 1f, 1f),
-                    Color.hsv(300f, 1f, 1f),
-                    Color.hsv(360f, 1f, 1f)
-                ), tileMode = TileMode.Repeated
-            )
+            if (isRtl) {
+                Brush.horizontalGradient(
+                    listOf(
+                        Color.hsv(360f, 1f, 1f),
+                        Color.hsv(300f, 1f, 1f),
+                        Color.hsv(240f, 1f, 1f),
+                        Color.hsv(180f, 1f, 1f),
+                        Color.hsv(120f, 1f, 1f),
+                        Color.hsv(60f, 1f, 1f),
+                        Color.hsv(0f, 1f, 1f)
+                    ), tileMode = TileMode.Repeated
+                )
+            } else {
+                Brush.horizontalGradient(
+                    listOf(
+                        Color.hsv(0f, 1f, 1f),
+                        Color.hsv(60f, 1f, 1f),
+                        Color.hsv(120f, 1f, 1f),
+                        Color.hsv(180f, 1f, 1f),
+                        Color.hsv(240f, 1f, 1f),
+                        Color.hsv(300f, 1f, 1f),
+                        Color.hsv(360f, 1f, 1f)
+                    ), tileMode = TileMode.Repeated
+                )
+            }
         }
     }
     Slider(

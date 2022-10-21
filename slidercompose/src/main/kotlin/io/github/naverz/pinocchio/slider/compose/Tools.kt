@@ -8,7 +8,9 @@ package io.github.naverz.pinocchio.slider.compose
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 
 @Composable
 internal fun Dp.toPx(): Float {
@@ -23,4 +25,9 @@ internal fun Int.toDp(): Dp {
 @Composable
 internal fun Float.toDp(): Dp {
     return LocalDensity.current.run { this@toDp.toDp() }
+}
+
+@Composable
+internal fun isRtl(): Boolean {
+    return LocalLayoutDirection.current == LayoutDirection.Rtl
 }

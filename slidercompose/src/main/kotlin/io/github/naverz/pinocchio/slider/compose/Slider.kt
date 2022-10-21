@@ -51,6 +51,7 @@ fun Slider(
     var thumbSize by remember { mutableStateOf(IntSize(0, 0)) }
     val updatedOnValueChanged by rememberUpdatedState(newValue = onValueChanged)
     val updatedOnValueConfirmed by rememberUpdatedState(newValue = onValueConfirmed)
+    val isRtl = isRtl()
     Box(modifier) {
         SubcomposeLayout(
             if (isVertical) {
@@ -67,6 +68,7 @@ fun Slider(
                                 val event: PointerEvent = awaitPointerEvent()
                                 event.changes.forEach { pointerInputChange: PointerInputChange ->
                                     findNextValue(
+                                        isRtl = isRtl,
                                         isVertical = isVertical,
                                         touchOffset = if (isVertical) pointerInputChange.position.y else pointerInputChange.position.x,
                                         maxOffset = (if (isVertical) containerSize.height else containerSize.width).toFloat(),
@@ -116,9 +118,9 @@ fun Slider(
                 if (isVertical) sliderPlaceable.height - thumbPlaceable.height
                 else sliderPlaceable.width - thumbPlaceable.width
             layout(containerSize.width, containerSize.height) {
-                sliderPlaceable.place(0, 0)
+                sliderPlaceable.placeRelative(0, 0)
                 if (isThumbInSlider) {
-                    thumbPlaceable.place(
+                    thumbPlaceable.placeRelative(
                         x = if (isVertical)
                             (sliderPlaceable.width - thumbPlaceable.width) / 2
                         else
@@ -129,7 +131,7 @@ fun Slider(
                             (sliderPlaceable.height - thumbPlaceable.height) / 2
                     )
                 } else {
-                    thumbPlaceable.place(
+                    thumbPlaceable.placeRelative(
                         x = if (isVertical) 0 else (value * sliderSizeWithoutPadding).toInt(),
                         y = if (isVertical) ((1 - value) * sliderSizeWithoutPadding).toInt() else 0
                     )
@@ -183,6 +185,7 @@ private fun SliderWithThumbPadding(
 }
 
 private fun findNextValue(
+    isRtl: Boolean,
     isVertical: Boolean,
     touchOffset: Float,
     maxOffset: Float,
@@ -190,13 +193,13 @@ private fun findNextValue(
 ): Float {
     val halfOfThumbStandardLengthPx = thumbStandardLength / 2
     return if (touchOffset < halfOfThumbStandardLengthPx) {
-        if (isVertical) 1f else 0f
+        if (isVertical || isRtl) 1f else 0f
     } else if (touchOffset > maxOffset - halfOfThumbStandardLengthPx) {
-        if (isVertical) 0f else 1f
+        if (isVertical || isRtl) 0f else 1f
     } else {
         ((touchOffset - halfOfThumbStandardLengthPx) / (maxOffset - thumbStandardLength))
             .let { calculatedValue ->
-                if (isVertical) 1 - calculatedValue
+                if (isVertical || isRtl) 1 - calculatedValue
                 else calculatedValue
             }
             .coerceIn(0f, 1f)
