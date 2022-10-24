@@ -16,7 +16,7 @@
 You can use Gradle :
 ```gradle
 dependencies {
-   implementation 'io.github.naverz.pinocchio:slider-compose:1.0.6'
+   implementation 'io.github.naverz.pinocchio:slider-compose:1.0.7'
 }
 ```
 
