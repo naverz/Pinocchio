@@ -15,6 +15,7 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.RectF
 import android.graphics.Shader
+import android.os.Build
 import android.view.View
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.background
@@ -298,6 +299,13 @@ private class CompatSaturationValuePanel(context: Context, rtl: Boolean) :
 
     private var panelPaint = Paint().apply {
         isAntiAlias = true
+    }
+
+    init {
+        // Ref : https://developer.android.com/topic/performance/hardware-accel?hl=en#drawing-support
+        if (Build.VERSION.SDK_INT <= 27) {
+            setLayerType(LAYER_TYPE_SOFTWARE, null)
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
