@@ -20,7 +20,7 @@ You can use Gradle :
 
 ```gradle
 dependencies {
-   implementation 'io.github.naverz.pinocchio:hsvpicker-compose:1.0.7'
+   implementation 'io.github.naverz.pinocchio:hsvpicker-compose:1.0.8'
 }
 ```
 
