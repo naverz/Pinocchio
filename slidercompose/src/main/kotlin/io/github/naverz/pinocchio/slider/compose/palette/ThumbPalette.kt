@@ -23,10 +23,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import io.github.naverz.pinocchio.slider.compose.data.Stroke
 import io.github.naverz.pinocchio.slider.compose.data.stroke
-import io.github.naverz.pinocchio.slider.compose.defaultThumbRadius
 import io.github.naverz.pinocchio.slider.compose.defaultThumbSize
-import io.github.naverz.pinocchio.slider.compose.defaultThumbStroke
-import io.github.naverz.pinocchio.slider.compose.defaultThumbStrokeWidth
 
 object ThumbPalette {
     @Composable
