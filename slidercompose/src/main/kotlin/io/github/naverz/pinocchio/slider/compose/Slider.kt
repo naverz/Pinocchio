@@ -35,6 +35,7 @@ import io.github.naverz.pinocchio.slider.compose.data.Background
 import io.github.naverz.pinocchio.slider.compose.data.Stroke
 import io.github.naverz.pinocchio.slider.compose.palette.SliderPalette
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
+import io.github.naverz.pinocchio.slider.compose.palette.property.NarrowSliderProperty
 
 @Composable
 fun Slider(
@@ -342,6 +343,31 @@ private fun PreviewSlider() {
                         ),
                         color = Color.Black,
                         thumbStroke = defaultThumbStroke
+                    )
+                }
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Slider(
+                Modifier.height(200.dp),
+                value = value,
+                isVertical = true,
+                onValueChanged = { value = it },
+                slider = {
+                    SliderPalette.NarrowSlider(
+                        isVertical = true,
+                        sliderWidth = defaultSliderWidth,
+                        sliderHeight = 200.dp,
+                        property = NarrowSliderProperty(
+                            startPeekWidth = 30.dp,
+                            endPeekWidth = 15.dp
+                        ),
+                    )
+                },
+                thumb = {
+                    ThumbPalette.CircleThumb(
+                        thumbRadius = 18.dp,
+                        color = Color.White,
+                        thumbElevation = 4f.dp
                     )
                 }
             )

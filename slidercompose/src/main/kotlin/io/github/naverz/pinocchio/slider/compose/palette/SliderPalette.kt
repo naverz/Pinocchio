@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -23,6 +26,7 @@ import io.github.naverz.pinocchio.slider.compose.data.Background
 import io.github.naverz.pinocchio.slider.compose.data.Stroke
 import io.github.naverz.pinocchio.slider.compose.data.background
 import io.github.naverz.pinocchio.slider.compose.data.stroke
+import io.github.naverz.pinocchio.slider.compose.palette.property.NarrowSliderProperty
 
 object SliderPalette {
 
@@ -313,6 +317,130 @@ object SliderPalette {
             }
         }
     }
+
+    @Composable
+    fun NarrowSlider(
+        property: NarrowSliderProperty,
+        isVertical: Boolean,
+        sliderWidth: Dp,
+        sliderHeight: Dp
+    ) {
+        androidx.compose.foundation.Canvas(
+            modifier = Modifier
+                .width(
+                    if (isVertical)
+                        property.maxSize()
+                    else
+                        sliderWidth
+                )
+                .height(
+                    if (isVertical)
+                        sliderHeight
+                    else
+                        property.maxSize()
+                )
+        ) {
+            val startRadius = property.startPeekWidth.toPx() / 2
+            val endRadius = property.endPeekWidth.toPx() / 2
+
+            val leftTop = if (isVertical) {
+                Offset(
+                    x = size.width / 2 - startRadius,
+                    y = startRadius
+                )
+            } else {
+                Offset(
+                    x = startRadius,
+                    y = size.height / 2 - startRadius
+                )
+            }
+
+            val rightTop = if (isVertical) {
+                Offset(
+                    x = size.width / 2 + startRadius,
+                    y = startRadius
+                )
+            } else {
+                Offset(
+                    x = size.width - endRadius,
+                    y = size.height / 2 - endRadius
+                )
+            }
+
+            val rightBottom = if (isVertical) {
+                Offset(
+                    x = size.width / 2 + endRadius,
+                    y = size.height - endRadius
+                )
+            } else {
+                Offset(
+                    x = size.width - endRadius,
+                    y = size.height / 2 + endRadius
+                )
+            }
+
+            val leftBottom = if (isVertical) {
+                Offset(
+                    x = size.width / 2 - endRadius,
+                    y = size.height - endRadius
+                )
+            } else {
+                Offset(
+                    x = startRadius,
+                    y = size.height / 2 + startRadius
+                )
+            }
+
+            val trianglePath = Path().apply {
+                moveTo(x = leftTop.x, y = leftTop.y)
+                lineTo(x = rightTop.x, y = rightTop.y)
+                lineTo(x = rightBottom.x, y = rightBottom.y)
+                lineTo(x = leftBottom.x, y = leftBottom.y)
+                close()
+            }
+
+            drawIntoCanvas { canvas ->
+                canvas.drawOutline(
+                    outline = Outline.Generic(trianglePath),
+                    paint = Paint().apply {
+                        color = property.backgroundColor
+                        pathEffect = PathEffect.cornerPathEffect((0.5).dp.toPx())
+                    }
+                )
+                drawCircle(
+                    color = property.backgroundColor,
+                    center = if (isVertical) {
+                        Offset(
+                            x = size.width / 2,
+                            y = startRadius
+                        )
+                    } else {
+                        Offset(
+                            x = startRadius,
+                            y = size.height / 2
+                        )
+                    },
+                    radius = startRadius
+                )
+
+                drawCircle(
+                    color = property.backgroundColor,
+                    center = if (isVertical) {
+                        Offset(
+                            x = size.width / 2,
+                            y = size.height - endRadius
+                        )
+                    } else {
+                        Offset(
+                            x = size.width - endRadius,
+                            y = size.height / 2
+                        )
+                    },
+                    radius = endRadius
+                )
+            }
+        }
+    }
 }
 
 @Preview
@@ -356,4 +484,30 @@ fun PreviewNormalSliderPalette() {
         sliderStroke = Stroke.WidthColor(3.dp, Color.White),
         sliderElevation = 4.dp,
     )
+}
+
+@Preview
+@Composable
+fun PreviewNarrowSliderPalette() {
+    Row (verticalAlignment = Alignment.CenterVertically){
+        SliderPalette.NarrowSlider(
+            property = NarrowSliderProperty(
+                startPeekWidth = 30.dp,
+                endPeekWidth = 15.dp
+            ),
+            isVertical = false,
+            sliderWidth = 150.dp,
+            sliderHeight = 30.dp
+        )
+
+        SliderPalette.NarrowSlider(
+            property = NarrowSliderProperty(
+                startPeekWidth = 15.dp,
+                endPeekWidth = 30.dp
+            ),
+            isVertical = true,
+            sliderWidth = 30.dp,
+            sliderHeight = 150.dp
+        )
+    }
 }
