@@ -9,20 +9,30 @@ package io.github.naverz.pinocchio.slider.compose
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.forEachGesture
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -31,6 +41,7 @@ import io.github.naverz.pinocchio.slider.compose.data.Stroke
 import io.github.naverz.pinocchio.slider.compose.palette.PanelPalette
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SlidePanel(
     modifier: Modifier = Modifier,
@@ -55,8 +66,8 @@ fun SlidePanel(
     val updatedOnValueChanged by rememberUpdatedState(newValue = onValueChanged)
     val updatedOnValueConfirmed by rememberUpdatedState(newValue = onValueConfirmed)
     val isRtl = isRtl()
-    SubcomposeLayout(
-        modifier.pointerInput(Unit) {
+    Layout(contents = listOf(thumb, panel),
+        modifier = modifier.pointerInput(Unit) {
             forEachGesture {
                 awaitPointerEventScope {
                     awaitFirstDown()
@@ -86,7 +97,8 @@ fun SlidePanel(
                                 nextTouchPoint = it
                                 updatedOnValueChanged?.invoke(it.x, it.y)
                             }
-                            pointerInputChange.consumePositionChange()
+                            if (pointerInputChange.positionChange() != Offset.Zero)
+                                pointerInputChange.consume()
                         }
                     } while (event.changes.any { it.pressed })
                     nextTouchPoint?.let { stableNextTouchPoint ->
@@ -96,29 +108,38 @@ fun SlidePanel(
                     }
                 }
             }
-        }
-
-    ) { constraints ->
+        }) { (thumbMeasurable, panelMeasurable), constraints ->
         val fixedConstraints = constraints.copy(minWidth = 0, minHeight = 0)
-        val thumbComposable: @Composable () -> Unit = { thumb.invoke() }
-        val panelComposableWithPadding: @Composable (thumbSize: IntSize) -> Unit = {
-            val paddingValues = PaddingValues((it.width / 2).toDp(), (it.height / 2).toDp())
-            Box(Modifier.padding(paddingValues)) { panel.invoke() }
-        }
         val thumbPlaceable =
-            subcompose("Thumb", content = thumbComposable)
+            thumbMeasurable
                 .map { it.measure(fixedConstraints) }
                 .first()
         thumbSize = IntSize(thumbPlaceable.width, thumbPlaceable.height)
-        val panelWithPaddingPlaceable =
-            subcompose("Panel") { panelComposableWithPadding.invoke(thumbSize) }
-                .map { it.measure(fixedConstraints) }.first()
-        containerSize = IntSize(panelWithPaddingPlaceable.width, panelWithPaddingPlaceable.height)
-        layout(panelWithPaddingPlaceable.width, panelWithPaddingPlaceable.height) {
-            panelWithPaddingPlaceable.placeRelative(0, 0)
+        val panelPlaceable = panelMeasurable
+            .map {
+                val maxWidth = constraints.maxWidth - thumbPlaceable.width
+                val maxHeight = constraints.maxHeight - thumbPlaceable.height
+                it.measure(
+                    constraints.copy(
+                        minWidth = 0,
+                        maxWidth = maxWidth,
+                        minHeight = 0,
+                        maxHeight = maxHeight
+                    )
+                )
+            }
+            .first()
+
+        val wholeWidth = panelPlaceable.width + thumbPlaceable.width
+        val wholeHeight = panelPlaceable.height + thumbPlaceable.height
+
+
+        containerSize = IntSize(wholeWidth, wholeHeight)
+        layout(wholeWidth, wholeHeight) {
+            panelPlaceable.placeRelative(thumbPlaceable.width / 2, thumbPlaceable.height / 2)
             thumbPlaceable.placeRelative(
-                (x * (panelWithPaddingPlaceable.width - thumbPlaceable.width)).toInt(),
-                ((1 - y) * (panelWithPaddingPlaceable.height - thumbPlaceable.height)).toInt()
+                (x * (wholeWidth - thumbPlaceable.width)).toInt(),
+                ((1 - y) * (wholeHeight - thumbPlaceable.height)).toInt()
             )
         }
     }

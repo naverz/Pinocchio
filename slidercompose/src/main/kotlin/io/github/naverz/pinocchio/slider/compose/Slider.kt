@@ -11,12 +11,26 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.forEachGesture
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
@@ -25,18 +39,18 @@ import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import io.github.naverz.pinocchio.slider.compose.data.Background
 import io.github.naverz.pinocchio.slider.compose.data.Stroke
 import io.github.naverz.pinocchio.slider.compose.palette.SliderPalette
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 import io.github.naverz.pinocchio.slider.compose.palette.property.NarrowSliderProperty
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Slider(
     modifier: Modifier = Modifier,
@@ -54,8 +68,8 @@ fun Slider(
     val updatedOnValueConfirmed by rememberUpdatedState(newValue = onValueConfirmed)
     val isRtl = isRtl()
     Box(modifier) {
-        SubcomposeLayout(
-            if (isVertical) {
+        Layout(
+            modifier = if (isVertical) {
                 Modifier.fillMaxHeight()
             } else {
                 Modifier.fillMaxWidth()
@@ -88,53 +102,86 @@ fun Slider(
                     }
                 }
                 .align(Alignment.Center),
-        ) { constraints ->
+            contents = listOf(thumb, slider)
+        ) { (thumbMeasurable, sliderMeasurable), constraints ->
             val fixedConstraints = constraints.copy(minWidth = 0, minHeight = 0)
             val thumbPlaceable =
-                subcompose("Thumb", content = thumb)
+                thumbMeasurable
                     .map { it.measure(fixedConstraints) }
                     .first()
             thumbSize = IntSize(thumbPlaceable.width, thumbPlaceable.height)
 
-            val sliderWithoutPadding = subcompose("SliderWithoutPadding", slider)
-                .map { it.measure(fixedConstraints) }
+            val sliderPlaceable = sliderMeasurable
+                .map {
+                    it.measure(
+                        if (isVertical)
+                            fixedConstraints.copy(maxHeight = fixedConstraints.maxHeight - thumbPlaceable.height)
+                        else
+                            fixedConstraints.copy(maxWidth = fixedConstraints.maxWidth - thumbPlaceable.width)
+                    )
+                }
                 .first()
-            val sliderPlaceable = subcompose("Slider") {
-                val sliderWidth =
-                    if (isVertical) sliderWithoutPadding.width else sliderWithoutPadding.height
-                SliderWithThumbPadding(
-                    isVertical = isVertical,
-                    sliderWidth = sliderWidth,
-                    thumbSize = thumbSize,
-                    slider = slider
-                )
-            }.map { it.measure(fixedConstraints) }.first()
 
-            val isThumbInSlider =
+            val isThumbSmallerThenSlider =
                 if (isVertical) sliderPlaceable.width > thumbPlaceable.width
                 else sliderPlaceable.height > thumbPlaceable.height
 
-            containerSize = IntSize(sliderPlaceable.width, sliderPlaceable.height)
-            val sliderSizeWithoutPadding =
-                if (isVertical) sliderPlaceable.height - thumbPlaceable.height
-                else sliderPlaceable.width - thumbPlaceable.width
-            layout(containerSize.width, containerSize.height) {
-                sliderPlaceable.placeRelative(0, 0)
-                if (isThumbInSlider) {
+            val containerWidth = if (isVertical) {
+                if (isThumbSmallerThenSlider) {
+                    sliderPlaceable.width
+                } else {
+                    thumbPlaceable.width
+                }
+            } else {
+                fixedConstraints.maxWidth
+            }
+            val containerHeight = if (isVertical) {
+                fixedConstraints.maxHeight
+            } else {
+                if (isThumbSmallerThenSlider) {
+                    sliderPlaceable.height
+                } else {
+                    thumbPlaceable.height
+                }
+            }
+            containerSize =
+                IntSize(width = containerWidth, height = containerHeight)
+            layout(containerWidth, containerHeight) {
+                if (isVertical) {
+                    sliderPlaceable.placeRelative(
+                        x = if (isThumbSmallerThenSlider) {
+                            0
+                        } else {
+                            (thumbPlaceable.width - sliderPlaceable.width) / 2
+                        },
+                        y = thumbPlaceable.height / 2
+                    )
+                } else {
+                    sliderPlaceable.placeRelative(
+                        x = thumbPlaceable.width / 2,
+                        y = if (isThumbSmallerThenSlider) {
+                            0
+                        } else {
+                            (thumbPlaceable.height - sliderPlaceable.height) / 2
+                        }
+                    )
+                }
+
+                if (isThumbSmallerThenSlider) {
                     thumbPlaceable.placeRelative(
                         x = if (isVertical)
                             (sliderPlaceable.width - thumbPlaceable.width) / 2
                         else
-                            (value * sliderSizeWithoutPadding).toInt(),
+                            (value * sliderPlaceable.width).toInt(),
                         y = if (isVertical)
-                            ((1 - value) * sliderSizeWithoutPadding).toInt()
+                            ((1 - value) * sliderPlaceable.height).toInt()
                         else
                             (sliderPlaceable.height - thumbPlaceable.height) / 2
                     )
                 } else {
                     thumbPlaceable.placeRelative(
-                        x = if (isVertical) 0 else (value * sliderSizeWithoutPadding).toInt(),
-                        y = if (isVertical) ((1 - value) * sliderSizeWithoutPadding).toInt() else 0
+                        x = if (isVertical) 0 else (value * sliderPlaceable.width).toInt(),
+                        y = if (isVertical) ((1 - value) * sliderPlaceable.height).toInt() else 0
                     )
                 }
             }
@@ -142,48 +189,6 @@ fun Slider(
     }
 }
 
-@Composable
-private fun SliderWithThumbPadding(
-    sliderWidth: Int,
-    thumbSize: IntSize,
-    isVertical: Boolean,
-    slider: (@Composable () -> Unit)
-) {
-    val isThumbInSlider =
-        if (isVertical) sliderWidth > thumbSize.width
-        else sliderWidth > thumbSize.height
-    val sliderWidthDp = sliderWidth.toDp()
-    BoxWithConstraints(
-        modifier = Modifier
-            .run {
-                if (isVertical) {
-                    val gap =
-                        if (isThumbInSlider) 0.dp else ((thumbSize.width - sliderWidth) / 2).toDp()
-                    wrapContentHeight()
-                        .width(sliderWidthDp + 2 * gap)
-                        .padding(
-                            start = gap,
-                            top = (thumbSize.height / 2).toDp(),
-                            bottom = (thumbSize.height / 2).toDp(),
-                            end = gap,
-                        )
-                } else {
-                    val gap =
-                        if (isThumbInSlider) 0.dp else ((thumbSize.height - sliderWidth) / 2).toDp()
-                    wrapContentWidth()
-                        .height(sliderWidthDp + 2 * gap)
-                        .padding(
-                            start = (thumbSize.width / 2).toDp(),
-                            top = gap,
-                            end = (thumbSize.width / 2).toDp(),
-                            bottom = gap
-                        )
-                }
-            }
-    ) {
-        slider.invoke()
-    }
-}
 
 private fun findNextValue(
     isRtl: Boolean,
