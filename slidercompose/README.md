@@ -16,7 +16,7 @@
 You can use Gradle :
 ```gradle
 dependencies {
-   implementation 'io.github.naverz.pinocchio:slider-compose:1.0.8'
+   implementation 'io.github.naverz.pinocchio:slider-compose:1.0.9'
 }
 ```
 
@@ -186,6 +186,21 @@ SliderPalette.BalancingSlider(
     activeBrush = SolidColor(Color(0xff292930)),
     inactivateBrush = SolidColor(Color(0xffE0E0E1)),
     sliderCornerShape = RoundedCornerShape(4.dp),
+)
+
+```
+
+<img src="static/narrowSlider.png" width="250" >
+
+```kotlin
+SliderPalette.NarrowSlider(
+    property = NarrowSliderProperty(
+      startPeekWidth = 30.dp,
+      endPeekWidth = 15.dp
+    ),
+    isVertical = false, 
+    sliderWidth = 150.dp,
+    sliderHeight = 30.dp
 )
 
 ```
