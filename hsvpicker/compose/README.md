@@ -17,6 +17,9 @@ HSVPicker is an easy and highly customizable HSV picker library for Android.
  <tr>
   <td>Compose UI 1.2 (1.2.x)</td><td><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.naverz.pinocchio/hsvpicker-compose?versionPrefix=1.1"></td>
  </tr>
+ <tr>
+  <td>Compose UI 1.3 (1.3.x)</td><td><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.naverz.pinocchio/hsvpicker-compose?versionPrefix=1.2"></td>
+ </tr>
 </table>
 
 ## Download
