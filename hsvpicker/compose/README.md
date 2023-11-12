@@ -8,11 +8,16 @@ HSVPicker is an easy and highly customizable HSV picker library for Android.
 
 <img src="static/HSVPicker.gif" width="300" > | <img src="static/HueSlider.gif" width="300" >  
 
-## Compose version
+## Compose versions
 
-**Current support compose version : 1.1.x**
-
-> ⚠️ **Ensure you are using same version with our support Compose version**: If it's not, it will choose your highest Compose version via transitive dependencies.
+<table>
+ <tr>
+  <td>Compose 1.1 (1.1.x)</td><td><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.naverz.pinocchio/hsvpicker-compose?versionPrefix=1.0"></td>
+ </tr>
+ <tr>
+  <td>Compose UI 1.2 (1.2.x)</td><td><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.naverz.pinocchio/hsvpicker-compose?versionPrefix=1.1"></td>
+ </tr>
+</table>
 
 ## Download
 
@@ -20,7 +25,7 @@ You can use Gradle :
 
 ```gradle
 dependencies {
-   implementation 'io.github.naverz.pinocchio:hsvpicker-compose:1.0.9'
+   implementation 'io.github.naverz.pinocchio:hsvpicker-compose:<version>'
 }
 ```
 
