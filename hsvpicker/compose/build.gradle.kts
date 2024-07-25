@@ -7,7 +7,8 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
-    id("com.vanniktech.maven.publish")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
+    id("com.vanniktech.maven.publish") version "0.29.0"
 }
 
 android {
@@ -16,7 +17,6 @@ android {
 
     defaultConfig {
         minSdk = 21
-        targetSdk = io.github.naverz.pinocchio.Versions.ANDROID_TARGET_SDK_NO
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")

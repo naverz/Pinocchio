@@ -7,7 +7,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
-
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.0"
 }
 android {
     namespace = "io.github.naverz.hsvpicker.sample"
@@ -16,7 +16,7 @@ android {
     defaultConfig {
         applicationId = "io.github.naverz.hsvpicker.sample"
         minSdk = 21
-        targetSdk = 32
+        targetSdk = 33
         versionCode = 1
         versionName = "1.0"
 

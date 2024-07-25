@@ -9,8 +9,8 @@ package io.github.naverz.pinocchio.slider.compose
 import androidx.annotation.FloatRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,21 +24,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerInputChange
-import androidx.compose.ui.input.pointer.consumePositionChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
@@ -50,7 +51,6 @@ import io.github.naverz.pinocchio.slider.compose.palette.SliderPalette
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 import io.github.naverz.pinocchio.slider.compose.palette.property.NarrowSliderProperty
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Slider(
     modifier: Modifier = Modifier,
@@ -75,29 +75,28 @@ fun Slider(
                 Modifier.fillMaxWidth()
             }
                 .pointerInput(isVertical) {
-                    forEachGesture {
-                        awaitPointerEventScope {
-                            awaitFirstDown()
-                            var nextValue: Float? = null
-                            do {
-                                val event: PointerEvent = awaitPointerEvent()
-                                event.changes.forEach { pointerInputChange: PointerInputChange ->
-                                    findNextValue(
-                                        isRtl = isRtl,
-                                        isVertical = isVertical,
-                                        touchOffset = if (isVertical) pointerInputChange.position.y else pointerInputChange.position.x,
-                                        maxOffset = (if (isVertical) containerSize.height else containerSize.width).toFloat(),
-                                        thumbStandardLength = (if (isVertical) thumbSize.height else thumbSize.width).toFloat()
-                                    ).let {
-                                        nextValue = it
-                                        updatedOnValueChanged?.invoke(it)
-                                    }
-                                    pointerInputChange.consumePositionChange()
+                    awaitEachGesture {
+                        awaitFirstDown()
+                        var nextValue: Float? = null
+                        do {
+                            val event: PointerEvent = awaitPointerEvent()
+                            event.changes.forEach { pointerInputChange: PointerInputChange ->
+                                findNextValue(
+                                    isRtl = isRtl,
+                                    isVertical = isVertical,
+                                    touchOffset = if (isVertical) pointerInputChange.position.y else pointerInputChange.position.x,
+                                    maxOffset = (if (isVertical) containerSize.height else containerSize.width).toFloat(),
+                                    thumbStandardLength = (if (isVertical) thumbSize.height else thumbSize.width).toFloat()
+                                ).let {
+                                    nextValue = it
+                                    updatedOnValueChanged?.invoke(it)
                                 }
-                            } while (event.changes.any { it.pressed })
-                            nextValue?.let { stableNextValue ->
-                                updatedOnValueConfirmed?.invoke(stableNextValue)
+                                if (pointerInputChange.positionChange() != Offset.Zero)
+                                    pointerInputChange.consume()
                             }
+                        } while (event.changes.any { it.pressed })
+                        nextValue?.let { stableNextValue ->
+                            updatedOnValueConfirmed?.invoke(stableNextValue)
                         }
                     }
                 }
@@ -216,7 +215,7 @@ private fun findNextValue(
 @Composable
 private fun PreviewSlider() {
     var value by remember {
-        mutableStateOf(0f)
+        mutableFloatStateOf(0f)
     }
     Column {
         Spacer(modifier = Modifier.height(10.dp))
@@ -390,7 +389,7 @@ private fun PreviewSlider() {
 @Preview
 @Composable
 private fun PreviewBalancingSlider() {
-    var value by remember { mutableStateOf(0.5f) }
+    var value by remember { mutableFloatStateOf(0.5f) }
     Column {
         Spacer(modifier = Modifier.height(15.dp))
         Slider(

@@ -7,8 +7,8 @@
 package io.github.naverz.pinocchio.slider.compose
 
 import androidx.annotation.FloatRange
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,12 +18,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -41,7 +41,6 @@ import io.github.naverz.pinocchio.slider.compose.data.Stroke
 import io.github.naverz.pinocchio.slider.compose.palette.PanelPalette
 import io.github.naverz.pinocchio.slider.compose.palette.ThumbPalette
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SlidePanel(
     modifier: Modifier = Modifier,
@@ -68,44 +67,42 @@ fun SlidePanel(
     val isRtl = isRtl()
     Layout(contents = listOf(thumb, panel),
         modifier = modifier.pointerInput(Unit) {
-            forEachGesture {
-                awaitPointerEventScope {
-                    awaitFirstDown()
-                    val halfThumbWidth = thumbSize.width.toFloat() / 2
-                    val halfThumbHeight = thumbSize.height.toFloat() / 2
-                    val panelRect = Rect(
-                        halfThumbWidth,
-                        halfThumbHeight,
-                        containerSize.width - halfThumbWidth,
-                        containerSize.height - halfThumbHeight
-                    )
-                    var nextTouchPoint: Offset? = null
-                    do {
-                        val event: PointerEvent = awaitPointerEvent()
-                        event.changes.forEach { pointerInputChange: PointerInputChange ->
-                            findNextValue(
-                                isRtl = isRtl,
-                                containerSize = containerSize,
-                                panelRect = panelRect,
-                                touchPoint = Offset(
-                                    x = pointerInputChange.position.x,
-                                    y = pointerInputChange.position.y
-                                ),
-                                halfThumbWidth = halfThumbWidth,
-                                halfThumbHeight = halfThumbHeight
-                            ).let {
-                                nextTouchPoint = it
-                                updatedOnValueChanged?.invoke(it.x, it.y)
-                            }
-                            if (pointerInputChange.positionChange() != Offset.Zero)
-                                pointerInputChange.consume()
+            awaitEachGesture {
+                awaitFirstDown()
+                val halfThumbWidth = thumbSize.width.toFloat() / 2
+                val halfThumbHeight = thumbSize.height.toFloat() / 2
+                val panelRect = Rect(
+                    halfThumbWidth,
+                    halfThumbHeight,
+                    containerSize.width - halfThumbWidth,
+                    containerSize.height - halfThumbHeight
+                )
+                var nextTouchPoint: Offset? = null
+                do {
+                    val event: PointerEvent = awaitPointerEvent()
+                    event.changes.forEach { pointerInputChange: PointerInputChange ->
+                        findNextValue(
+                            isRtl = isRtl,
+                            containerSize = containerSize,
+                            panelRect = panelRect,
+                            touchPoint = Offset(
+                                x = pointerInputChange.position.x,
+                                y = pointerInputChange.position.y
+                            ),
+                            halfThumbWidth = halfThumbWidth,
+                            halfThumbHeight = halfThumbHeight
+                        ).let {
+                            nextTouchPoint = it
+                            updatedOnValueChanged?.invoke(it.x, it.y)
                         }
-                    } while (event.changes.any { it.pressed })
-                    nextTouchPoint?.let { stableNextTouchPoint ->
-                        updatedOnValueConfirmed?.invoke(
-                            stableNextTouchPoint.x, stableNextTouchPoint.y
-                        )
+                        if (pointerInputChange.positionChange() != Offset.Zero)
+                            pointerInputChange.consume()
                     }
+                } while (event.changes.any { it.pressed })
+                nextTouchPoint?.let { stableNextTouchPoint ->
+                    updatedOnValueConfirmed?.invoke(
+                        stableNextTouchPoint.x, stableNextTouchPoint.y
+                    )
                 }
             }
         }) { (thumbMeasurable, panelMeasurable), constraints ->
@@ -242,10 +239,10 @@ private fun findNextValue(
 @Preview
 private fun PreviewSliderPanel() {
     var x by remember {
-        mutableStateOf(0f)
+        mutableFloatStateOf(0f)
     }
     var y by remember {
-        mutableStateOf(0f)
+        mutableFloatStateOf(0f)
     }
     Column {
         SlidePanel(

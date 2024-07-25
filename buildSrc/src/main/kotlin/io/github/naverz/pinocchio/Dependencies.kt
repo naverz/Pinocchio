@@ -7,7 +7,7 @@ object Dependencies {
         const val ESPRESSO_CORE = "androidx.test.espresso:espresso-core:3.4.0"
     }
 
-    object Material{
+    object Material {
         const val STANDARD = "com.google.android.material:material:1.4.0"
     }
     object AndroidX {
@@ -17,7 +17,7 @@ object Dependencies {
 
         object Compose {
             const val UI_TOOLING = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE_VERSION}"
-            const val ACTIVITY_COMPOSE = "androidx.activity:activity-compose:1.4.0"
+            const val ACTIVITY_COMPOSE = "androidx.activity:activity-compose:1.9.1"
             const val COMPOSE_FOUNDATION =
                 "androidx.compose.foundation:foundation:${Versions.COMPOSE_VERSION}"
         }
