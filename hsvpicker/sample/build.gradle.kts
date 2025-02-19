@@ -43,9 +43,6 @@ android {
         jvmTarget = "1.8"
         freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = io.github.naverz.pinocchio.Versions.COMPOSE_VERSION
-    }
 }
 
 dependencies {

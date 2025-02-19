@@ -16,10 +16,10 @@ object Dependencies {
         const val CONSTRAINT_LAYOUT = "androidx.constraintlayout:constraintlayout:2.1.1"
 
         object Compose {
-            const val UI_TOOLING = "androidx.compose.ui:ui-tooling:${Versions.COMPOSE_VERSION}"
-            const val ACTIVITY_COMPOSE = "androidx.activity:activity-compose:1.9.1"
-            const val COMPOSE_FOUNDATION =
-                "androidx.compose.foundation:foundation:${Versions.COMPOSE_VERSION}"
+            const val BOM = "androidx.compose:compose-bom:${Versions.COMPOSE_BOM}"
+            const val UI_TOOLING = "androidx.compose.ui:ui-tooling"
+            const val ACTIVITY_COMPOSE = "androidx.activity:activity-compose"
+            const val COMPOSE_FOUNDATION = "androidx.compose.foundation:foundation"
         }
     }
 }

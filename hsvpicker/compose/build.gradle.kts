@@ -42,14 +42,11 @@ android {
         jvmTarget = "1.8"
         freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn"
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = io.github.naverz.pinocchio.Versions.COMPOSE_VERSION
-    }
 }
 
 dependencies {
     api(project(":slidercompose"))
-    implementation(io.github.naverz.pinocchio.Dependencies.AndroidX.Compose.ACTIVITY_COMPOSE)
+    implementation(platform(io.github.naverz.pinocchio.Dependencies.AndroidX.Compose.BOM))
     implementation(io.github.naverz.pinocchio.Dependencies.AndroidX.Compose.UI_TOOLING)
     implementation(io.github.naverz.pinocchio.Dependencies.AndroidX.Compose.COMPOSE_FOUNDATION)
     testImplementation(io.github.naverz.pinocchio.Dependencies.Test.JUNIT)

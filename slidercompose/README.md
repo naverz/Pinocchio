@@ -25,6 +25,9 @@
  <tr>
   <td>Compose UI 1.6 (1.6.x)</td><td><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.naverz.pinocchio/slider-compose?versionPrefix=1.5"></td>
  </tr>
+ <tr>
+  <td>Compose UI 1.7 (1.7.x)</td><td><img alt="Maven Central" src="https://img.shields.io/maven-central/v/io.github.naverz.pinocchio/slider-compose?versionPrefix=1.6"></td>
+ </tr>
 </table>
 
 ## Download
