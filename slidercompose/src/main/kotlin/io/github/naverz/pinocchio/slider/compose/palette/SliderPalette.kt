@@ -239,17 +239,17 @@ object SliderPalette {
 
         if (isVertical) {
             Column(modifier = containerModifier) {
-                if (activeValue != 1f) {
+                if ((1 - activeValue) > 0) {
                     Box(
                         Modifier
-                            .weight(1 - activeValue.coerceAtLeast(0f))
+                            .weight(1 - activeValue)
                             .fillMaxWidth()
                             .background(
                                 inactivateBrush,
                                 if (activeValue != 0f) {
                                     sliderCornerShape.copy(
-                                        topStart = CornerSize(0.dp),
-                                        bottomStart = CornerSize(0.dp)
+                                        bottomStart = CornerSize(0.dp),
+                                        bottomEnd = CornerSize(0.dp)
                                     )
                                 } else {
                                     sliderCornerShape
@@ -257,17 +257,17 @@ object SliderPalette {
                             )
                     )
                 }
-                if (activeValue != 0f) {
+                if (activeValue > 0f) {
                     Box(
                         Modifier
-                            .weight(activeValue.coerceAtLeast(0f))
+                            .weight(activeValue)
                             .fillMaxWidth()
                             .background(
                                 activeBrush,
                                 if (activeValue != 1f) {
                                     sliderCornerShape.copy(
-                                        topEnd = CornerSize(0.dp),
-                                        bottomEnd = CornerSize(0.dp)
+                                        topStart = CornerSize(0.dp),
+                                        topEnd = CornerSize(0.dp)
                                     )
                                 } else {
                                     sliderCornerShape
@@ -278,10 +278,10 @@ object SliderPalette {
             }
         } else {
             Row(modifier = containerModifier) {
-                if (activeValue != 0f) {
+                if (activeValue > 0f) {
                     Box(
                         Modifier
-                            .weight(activeValue.coerceAtLeast(0f))
+                            .weight(activeValue)
                             .fillMaxHeight()
                             .background(
                                 activeBrush,
@@ -296,10 +296,10 @@ object SliderPalette {
                             )
                     )
                 }
-                if (activeValue != 1f) {
+                if (1 - activeValue > 0) {
                     Box(
                         Modifier
-                            .weight(1 - activeValue.coerceAtLeast(0f))
+                            .weight(1 - activeValue)
                             .fillMaxHeight()
                             .background(
                                 inactivateBrush,
@@ -470,6 +470,21 @@ fun PreviewActiveSliderPalette() {
         sliderStroke = Stroke.WidthColor(3.dp, Color.White),
     )
 }
+@Preview
+@Composable
+fun PreviewActiveVerticalSliderPalette() {
+    Box(Modifier.height(200.dp)) {
+        SliderPalette.ActiveSlider(
+            activeValue = 0.1f,
+            sliderWidth = 30.dp,
+            isVertical = true,
+            activeBrush = SolidColor(Color.Gray),
+            inactivateBrush = SolidColor(Color.Red),
+            sliderCornerShape = RoundedCornerShape(21.dp),
+            sliderStroke = Stroke.WidthColor(3.dp, Color.White),
+        )
+    }
+}
 
 @Preview
 @Composable
@@ -489,7 +504,7 @@ fun PreviewNormalSliderPalette() {
 @Preview
 @Composable
 fun PreviewNarrowSliderPalette() {
-    Row (verticalAlignment = Alignment.CenterVertically){
+    Row(verticalAlignment = Alignment.CenterVertically) {
         SliderPalette.NarrowSlider(
             property = NarrowSliderProperty(
                 startPeekWidth = 30.dp,
