@@ -95,7 +95,6 @@ fun SaturationValuePanel(
 }
 
 
-@OptIn(ExperimentalGraphicsApi::class)
 @Composable
 fun SaturationValuePanel(
     modifier: Modifier = Modifier,
@@ -194,7 +193,6 @@ private fun BaseSaturationValuePanel(
     }
 }
 
-@OptIn(ExperimentalGraphicsApi::class)
 @Composable
 @Preview
 fun PreviewSaturationValuePanel() {
